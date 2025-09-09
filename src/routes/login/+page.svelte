@@ -1,5 +1,5 @@
 <!-- src/routes/login/+page.svelte -->
-<main class="flex items-center justify-center min-h-screen bg-gray-100 font-mono">
+<main class="flex items-center justify-center min-h-screen font-mono">
     <div class="w-full max-w-md p-8 space-y-6 bg-white border-2 border-black shadow-[8px_8px_0_#000]">
         <h2 class="text-3xl font-bold text-center">Log In</h2>
         <form action="?/login" method="post" class="space-y-6">

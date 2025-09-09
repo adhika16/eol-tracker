@@ -19,7 +19,6 @@ export const actions = {
         try {
             session = await account.createEmailPasswordSession(email, password);
         } catch (error) {
-            console.log(error);
             return fail(401, { error: error.message });
         }
 
