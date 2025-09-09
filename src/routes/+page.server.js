@@ -6,29 +6,26 @@ import { Query } from 'node-appwrite';
 export async function load(event) {
 	const { url, locals } = event;
 	const framework = url.searchParams.get('framework');
-	let cycles = null;
+	let cycles = [];
+	let error = null;
 
 	if (framework) {
 		try {
-			const response = await fetch(`https://endoflife.date/api/${framework}.json`);
+			const response = await fetch(`https://endoflife.date/api/v1/products/${framework}`);
 			if (!response.ok) {
 				if (response.status === 404) {
-					return {
-						cycles: [],
-						error: `No EOL data found for "${framework}". Check the framework name.`
-					};
+					 error = `No EOL data found for "${framework}". Check the framework name.`;
 				}
-				return fail(response.status, { error: 'Failed to fetch EOL data.' });
-			}
-			cycles = await response.json();
-			if (!cycles || cycles.length === 0) {
-				return {
-					cycles: [],
-					error: `No EOL data found for "${framework}".`
-				};
+				error = 'Failed to fetch EOL data.';
+			} else {
+				const data = await response.json();
+				cycles = data.result.releases;
+				if (!cycles || cycles.length === 0) {
+					error = `No EOL data found for "${framework}".`;
+				}
 			}
 		} catch (err) {
-			return fail(500, { error: 'An error occurred while fetching EOL data.' });
+			error = 'An error occurred while fetching EOL data.';
 		}
 	}
 
@@ -41,7 +38,7 @@ export async function load(event) {
 		const trackedFrameworks = await Promise.all(
 			userFrameworks.documents.map(async (doc) => {
 				try {
-					const response = await fetch(`https://endoflife.date/api/${doc.framework_slug}.json`);
+					const response = await fetch(`https://endoflife.date/api/v1/products/${doc.framework_slug}`);
 					if (!response.ok) {
 						return {
 							...doc,
@@ -51,7 +48,8 @@ export async function load(event) {
 						};
 					}
 					const eolData = await response.json();
-					if (!Array.isArray(eolData) || eolData.length === 0) {
+					const releases = eolData.result.releases;
+					if (!Array.isArray(releases) || releases.length === 0) {
 						return {
 							...doc,
 							status: 'Unknown',
@@ -59,15 +57,17 @@ export async function load(event) {
 							error: 'No EOL data found'
 						};
 					}
-					const userCycle = eolData.find((cycle) => doc.version.startsWith(cycle.cycle));
+					const userCycle = releases.find((cycle) => doc.version.startsWith(cycle.name));
 					let status = 'Unknown';
+					let eol = null;
 					if (userCycle) {
-						status = new Date(userCycle.eol) < new Date() ? 'End of Life' : 'Supported';
+						status = userCycle.isEol ? 'End of Life' : 'Supported';
+						eol = userCycle.eolFrom;
 					}
 					return {
 						...doc,
 						status,
-						eol: userCycle?.eol
+						eol
 					};
 				} catch (err) {
 					return {
@@ -83,7 +83,8 @@ export async function load(event) {
 		return {
 			cycles,
 			user: locals.user,
-			trackedFrameworks
+			trackedFrameworks,
+			error
 		};
 	}
 

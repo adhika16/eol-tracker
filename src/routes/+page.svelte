@@ -88,16 +88,14 @@
 							{#each cycles as cycle, i}
 								<tr
 									class={`${i < cycles.length - 1 ? 'border-b-2 border-black' : ''} ${
-										cycle.eol && new Date(cycle.eol) < new Date()
-											? 'bg-red-100 text-red-700 font-bold'
-											: ''
+										cycle.isEol ? 'bg-red-100 text-red-700 font-bold' : ''
 									}`}
 								>
-									<td class="px-4 py-2">{cycle.cycle}</td>
+									<td class="px-4 py-2">{cycle.name}</td>
 									<td class="px-4 py-2"
-										>{cycle.eol ? new Date(cycle.eol).toLocaleDateString() : 'N/A'}</td
+										>{cycle.eolFrom ? new Date(cycle.eolFrom).toLocaleDateString() : 'N/A'}</td
 									>
-									<td class="px-4 py-2">{cycle.latest}</td>
+									<td class="px-4 py-2">{cycle.latest.name}</td>
 								</tr>
 							{/each}
 						</tbody>
