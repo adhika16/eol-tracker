@@ -29,6 +29,6 @@ export const actions = {
             path: "/",
         });
         
-        throw redirect(302, '/account');
+        throw redirect(302, '/');
     }
 };

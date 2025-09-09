@@ -2,8 +2,15 @@
 // src/routes/signup/+page.server.js
 
 import { SESSION_COOKIE, createAdminClient } from "$lib/server/appwrite.js";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, error, redirect } from "@sveltejs/kit";
 import { ID } from "node-appwrite";
+import { PUBLIC_APPWRITE_TEST_MODE } from '$env/static/public';
+
+export const load = () => {
+  if (PUBLIC_APPWRITE_TEST_MODE === 'true') {
+    throw error(404, { message: 'Page not available' });
+  }
+};
 
 export const actions = {
 	signup: async ({ request, cookies }) => {
@@ -32,6 +39,6 @@ export const actions = {
 			return fail(400, { error: error.message });
 		}
 
-		throw redirect(302, '/account');
+		throw redirect(302, '/');
 	}
 };
