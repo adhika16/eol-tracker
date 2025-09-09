@@ -2,44 +2,36 @@
 // src/routes/signup/+page.server.js
 
 import { SESSION_COOKIE, createAdminClient } from "$lib/server/appwrite.js";
-import { redirect } from "@sveltejs/kit";
-// @ts-ignore
-import { ID, OAuthProvider } from "node-appwrite";
+import { fail, redirect } from "@sveltejs/kit";
+import { ID } from "node-appwrite";
 
 export const actions = {
-  // @ts-ignore
-  signup: async ({ request, cookies }) => {
-    // Extract the form data.
-    const form = await request.formData();
-    const email = form.get("email");
-    const password = form.get("password");
-    // @ts-ignore
-    const name = form.get("name");
+	signup: async ({ request, cookies }) => {
+		const form = await request.formData();
+		const email = form.get('email');
+		const password = form.get('password');
+		const name = form.get('name');
 
-    // Create the Appwrite client.
-    const { account } = createAdminClient();
+		if (!email || !password || !name) {
+			return fail(400, { error: 'Name, email and password are required' });
+		}
 
-    // Create the session using the client
-    await account.create(
-        ID.unique(),
-        email,
-        password,
-        name
-    );
-    const session = await account.createEmailPasswordSession(
-        email,
-        password
-    );
+		const { account } = createAdminClient();
 
-    // Set the session cookie with the secret
-    cookies.set(SESSION_COOKIE, session.secret, {
-      sameSite: "strict",
-      expires: new Date(session.expire),
-      secure: true,
-      path: "/",
-    });
+		try {
+			await account.create(ID.unique(), email, password, name);
+			const session = await account.createEmailPasswordSession(email, password);
 
-    // Redirect to the account page.
-    redirect(302, "/account");
-  },
+			cookies.set(SESSION_COOKIE, session.secret, {
+				sameSite: 'strict',
+				expires: new Date(session.expire),
+				secure: true,
+				path: '/'
+			});
+		} catch (error) {
+			return fail(400, { error: error.message });
+		}
+
+		throw redirect(302, '/account');
+	}
 };

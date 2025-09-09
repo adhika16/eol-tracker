@@ -41,7 +41,7 @@
 				</div>
 			</form>
 
-			{#if cycles && user}
+			{#if cycles && cycles.length > 0 && user}
 				<form action="?/addFramework" method="POST" class="space-y-4">
 					<input type="hidden" name="framework" value={frameworkInput} />
 					<div>
@@ -66,10 +66,12 @@
 			{/if}
 
 			{#if error}
-				<p class="text-red-500 mt-4">{error}</p>
+				<div class="border-2 border-black bg-red-100 text-red-700 font-bold shadow-[8px_8px_0_#000] p-4 mt-4 text-center tracking-wide">
+					{error}
+				</div>
 			{/if}
 
-			{#if cycles}
+			{#if cycles && cycles.length > 0}
 				<div class="overflow-x-auto border-2 border-black shadow-[8px_8px_0_#000] mt-4">
 					<h3 class="text-lg font-bold p-2 bg-black text-white">
 						Available Cycles for {frameworkInput}
