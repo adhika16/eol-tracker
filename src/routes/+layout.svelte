@@ -35,7 +35,7 @@
 	<footer class="px-8 py-4 bg-white border-t-4 border-black text-center font-bold">
 		<p>
 			EOL Tracker is an open source project. View the code on 
-			<a href="#" target="_blank" class="underline text-blue-600 hover:text-blue-800">GitHub</a>.
+			<a href="https://github.com/adhika16/eol-tracker" target="_blank" class="underline text-blue-600 hover:text-blue-800">GitHub</a>.
 		</p>
 	</footer>
 </div>
