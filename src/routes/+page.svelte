@@ -80,7 +80,7 @@
 {/if}
 
 <main class="container mx-auto p-4 font-mono">
-	<h1 class="text-4xl font-bold mb-6 text-center">Framework EOL Checker</h1>
+	<h1 class="text-4xl font-bold mb-6 text-center">Framework EOL Tracker</h1>
 
 	<div class="max-w-4xl mx-auto">
 		<form method="GET" class="mb-4" id="search-bar">
