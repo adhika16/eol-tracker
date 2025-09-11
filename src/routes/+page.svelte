@@ -1,5 +1,8 @@
 <script>
-// @ts-nocheck
+	// @ts-nocheck
+	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+	import OnboardingStep from '$lib/components/OnboardingStep.svelte';
 
 	/** @type {import('./$types').PageData} */
 	// @ts-ignore
@@ -16,13 +19,71 @@
 
 	let frameworkInput = '';
 	let versionInput = '';
+
+	// Onboarding state
+	let showOnboarding = false;
+	let onboardingStep = 0;
+	const tourSteps = [
+		{
+			title: 'Search for a Framework',
+			content: 'Use this search bar to find any framework, library, or language.',
+			targetId: 'search-bar'
+		},
+		{
+			title: 'Add to Your List',
+			content:
+				'After searching, enter your version and click on \'add to your list\' button to add it to your personal tracking list.',
+			targetId: 'add-framework-form'
+		},
+		{
+			title: 'View Your List',
+			content: 'All your tracked frameworks will appear here, with their EOL status.',
+			targetId: 'tracked-frameworks-list'
+		}
+	];
+
+	onMount(() => {
+		if (user && user.prefs?.onboarded == 'false') {
+			// A small delay to ensure the page is rendered
+			setTimeout(() => {
+				showOnboarding = true;
+
+			}, 500);
+		}
+	});
+
+	function handleNext() {
+		if (onboardingStep < tourSteps.length - 1) {
+			onboardingStep++;
+		}
+	}
 </script>
+
+{#if showOnboarding}
+	<OnboardingStep
+		{...tourSteps[onboardingStep]}
+		isLast={onboardingStep === tourSteps.length - 1}
+		on:next={handleNext}
+		on:skip={() => (showOnboarding = false)}
+		on:complete={() => {
+			document.getElementById('onboarding-form')?.requestSubmit();
+			showOnboarding = false;
+		}}
+	/>
+	<form
+		id="onboarding-form"
+		action="?/completeOnboarding"
+		method="POST"
+		use:enhance
+		class="hidden"
+	/>
+{/if}
 
 <main class="container mx-auto p-4 font-mono">
 	<h1 class="text-4xl font-bold mb-6 text-center">Framework EOL Checker</h1>
 
 	<div class="max-w-4xl mx-auto">
-		<form method="GET" class="mb-4">
+		<form method="GET" class="mb-4" id="search-bar">
 			<div class="flex">
 				<input
 					type="search"
@@ -41,7 +102,12 @@
 		</form>
 
 		{#if cycles && cycles.length > 0 && user}
-			<form action="?/addFramework" method="POST" class="space-y-4 mb-4">
+			<form
+				action="?/addFramework"
+				method="POST"
+				class="space-y-4 mb-4"
+				id="add-framework-form"
+			>
 				<input type="hidden" name="framework" value={frameworkInput} />
 				<div>
 					<label for="version" class="block text-sm font-bold text-gray-700">Version</label>
@@ -105,7 +171,7 @@
 		{/if}
 	</div>
 
-	<div class="mt-8">
+	<div class="mt-8" id="tracked-frameworks-list">
 		{#if user}
 			<h2 class="text-2xl font-bold mb-4 text-center">My Tracked Frameworks</h2>
 			{#if trackedFrameworks && trackedFrameworks.length > 0}

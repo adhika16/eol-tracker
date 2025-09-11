@@ -30,7 +30,10 @@ export async function load(event) {
 	}
 
 	if (locals.user) {
-		const { databases } = createSessionClient(event);
+		const { databases, account } = createSessionClient(event);
+		const prefs = await account.getPrefs();
+		locals.user.prefs = prefs;
+
 		const userFrameworks = await databases.listDocuments(DB_ID, USER_FRAMEWORKS_COL_ID, [
 			Query.equal('user_id', locals.user.$id)
 		]);
@@ -138,6 +141,22 @@ export const actions = {
 			return { success: true };
 		} catch (error) {
 			return fail(500, { error: 'Failed to remove framework.' });
+		}
+	},
+	completeOnboarding: async (event) => {
+		const { locals } = event;
+		if (!locals.user) {
+			return fail(401, { error: 'Unauthorized' });
+		}
+		try {
+			const { account } = createSessionClient(event);
+			await account.updatePrefs({
+				...locals.user.prefs,
+				onboarded: true
+			});
+			return { success: true };
+		} catch (e) {
+			return fail(500, { error: 'Failed to update onboarding status.' });
 		}
 	}
 };
