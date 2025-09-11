@@ -43,7 +43,7 @@
 	];
 
 	onMount(() => {
-		if (user && user.prefs?.onboarded == 'false') {
+		if (user && !user.prefs?.onboarded) {
 			// A small delay to ensure the page is rendered
 			setTimeout(() => {
 				showOnboarding = true;
